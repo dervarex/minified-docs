@@ -1,0 +1,83 @@
+---
+title: Launching Basics
+description: Start your first Minecraft session
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+You should already have a `User` object from the [Authentication Guide](/guides/minified-auth/authentication).  
+If you haven't done that yet, please do so before continuing. <br />
+Additionally, you should have the gradle project set up from the [Getting Started Guide](/guides/getting-started).
+
+## 1. Create the Project
+
+1. Open **IntelliJ IDEA**.
+2. Select **New Project** $\rightarrow$ Choose **Gradle** (Java/Kotlin).
+
+---
+
+## 2. Configure Gradle
+
+Open your `build.gradle` file and add the repository and dependency:
+
+```groovy
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    // Replace 2.1.0 with your preferred version
+    implementation 'com.github.dervarex.minified:minified-launch:2.1.0'
+}
+```
+
+---
+
+## 3. First Startup
+
+<Tabs>
+  <TabItem label="Java">
+
+```java
+LaunchConfigurator config = new LaunchConfigurator.Builder()
+        .downloadThreads(10)
+        .launcherName("YourLauncherName")
+        .launcherVersion("1.0.0")
+        .assetsDirectory(Path.of("<assets-directory>"))
+        .librariesDirectory(Path.of("<libraries-directory>"))
+        .jarFile(Path.of("<client.jar>"))
+        .isDemoUser(false)
+        .loader(new VanillaLoader("1.21.11"))
+        .build();
+
+Launcher.launchMinecraft(
+        user,
+        config
+);
+```
+
+  </TabItem>
+
+  <TabItem label="Kotlin">
+
+```kotlin
+val config = LaunchConfigurator.Builder()
+    .downloadThreads(10)
+    .launcherName("YourLauncherName")
+    .launcherVersion("1.0.0")
+    .assetsDirectory(Path.of("<assets-directory>"))
+    .librariesDirectory(Path.of("<libraries-directory>"))
+    .jarFile(Path.of("<client.jar>"))
+    .isDemoUser(false)
+    .loader(VanillaLoader("1.21.11"))
+    .build()
+
+Launcher.launchMinecraft(
+    user,
+    config
+)
+```
+
+  </TabItem>
+</Tabs>

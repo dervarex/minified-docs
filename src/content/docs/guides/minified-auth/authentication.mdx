@@ -1,0 +1,384 @@
+---
+title: Authentication
+description: Authenticate Minecraft users with Microsoft using Minified Auth.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## 1. Add the Dependency
+
+Add `minified-auth` to your `build.gradle` file:
+
+```groovy
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'com.github.dervarex.minified:minified-auth:2.1.0'
+}
+````
+
+---
+
+## 2. Initialize the Auth Manager
+
+Before using authentication, initialize the `AuthManager` with a directory where sessions can be stored.
+
+<Tabs>
+  <TabItem label="Java">
+
+```java
+Path authDirectory = Path.of("<auth-directory>");
+
+AuthManager.init(authDirectory);
+```
+
+  </TabItem>
+  <TabItem label="Kotlin">
+
+```kotlin
+val authDirectory = Path.of("<auth-directory>")
+
+AuthManager.init(authDirectory)
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## 3. Check for a Saved Session
+
+Before starting a new login, check whether a saved session already exists.
+
+<Tabs>
+  <TabItem label="Java">
+
+```java
+User user = null;
+
+if (AuthManager.hasSessionSaved()) {
+    user = AuthManager.loginWithSavedSession();
+}
+```
+
+  </TabItem>
+  <TabItem label="Kotlin">
+
+```kotlin
+var user: User? = null
+
+if (AuthManager.hasSessionSaved()) {
+    user = AuthManager.loginWithSavedSession()
+}
+```
+
+  </TabItem>
+</Tabs>
+
+If the saved session is valid, `loginWithSavedSession()` returns the authenticated user.
+
+---
+
+## 4. Start Device Code Login
+
+If no saved session exists, start the Microsoft device code login:
+
+<Tabs>
+  <TabItem label="Java">
+
+```java
+AuthManager.startDeviceCodeLoginAsync();
+```
+
+  </TabItem>
+  <TabItem label="Kotlin">
+
+```kotlin
+AuthManager.startDeviceCodeLoginAsync()
+```
+
+  </TabItem>
+</Tabs>
+
+The login runs asynchronously. You can access its current state using:
+
+<Tabs>
+  <TabItem label="Java">
+
+```java
+LoginState state = AuthManager.getLoginState();
+```
+
+  </TabItem>
+  <TabItem label="Kotlin">
+
+```kotlin
+val state = AuthManager.getLoginState()
+```
+
+  </TabItem>
+</Tabs>
+
+Wait until the user code becomes available:
+
+<Tabs>
+  <TabItem label="Java">
+
+```java
+while (true) {
+    LoginState state = AuthManager.getLoginState();
+
+    if (state.userCode != null && state.verificationUri != null) {
+        System.out.println(
+                "Go to " + state.verificationUri
+                + " and enter code " + state.userCode
+        );
+        break;
+    }
+
+    Thread.sleep(500);
+}
+```
+
+  </TabItem>
+  <TabItem label="Kotlin">
+
+```kotlin
+while (true) {
+    val state = AuthManager.getLoginState()
+
+    if (state.userCode != null && state.verificationUri != null) {
+        println(
+            "Go to ${state.verificationUri} and enter code ${state.userCode}"
+        )
+        break
+    }
+
+    Thread.sleep(500)
+}
+```
+
+  </TabItem>
+</Tabs>
+
+The user can then open the verification URL and enter the displayed code.
+
+---
+
+## 5. Wait for Authentication
+
+After displaying the login instructions, wait until authentication succeeds or fails:
+
+<Tabs>
+  <TabItem label="Java">
+
+```java
+while (true) {
+    LoginState state = AuthManager.getLoginState();
+
+    if (state.status == AuthManager.LoginStatus.SUCCESS) {
+        break;
+    }
+
+    if (state.status == AuthManager.LoginStatus.ERROR) {
+        throw new IllegalStateException(state.message);
+    }
+
+    Thread.sleep(500);
+}
+```
+
+  </TabItem>
+  <TabItem label="Kotlin">
+
+```kotlin
+while (true) {
+    val state = AuthManager.getLoginState()
+
+    if (state.status == AuthManager.LoginStatus.SUCCESS) {
+        break
+    }
+
+    if (state.status == AuthManager.LoginStatus.ERROR) {
+        throw IllegalStateException(state.message)
+    }
+
+    Thread.sleep(500)
+}
+```
+
+  </TabItem>
+</Tabs>
+
+After a successful login, get the authenticated user:
+
+<Tabs>
+  <TabItem label="Java">
+
+```java
+User user = AuthManager.getUser();
+
+System.out.println(
+        "Logged in as "
+        + user.getUsername()
+        + " ("
+        + user.getUuid()
+        + ")"
+);
+```
+
+  </TabItem>
+  <TabItem label="Kotlin">
+
+```kotlin
+val user = AuthManager.getUser()
+
+println(
+    "Logged in as ${user.username} (${user.uuid})"
+)
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Complete Example
+
+<Tabs>
+  <TabItem label="Java">
+
+```java
+Path authDirectory = Path.of("<auth-directory>");
+
+AuthManager.init(authDirectory);
+
+User user = null;
+
+if (AuthManager.hasSessionSaved()) {
+    user = AuthManager.loginWithSavedSession();
+}
+
+if (user == null) {
+    AuthManager.startDeviceCodeLoginAsync();
+
+    boolean loginInstructionsShown = false;
+
+    while (true) {
+        LoginState state = AuthManager.getLoginState();
+
+        if (!loginInstructionsShown
+                && state.userCode != null
+                && state.verificationUri != null) {
+
+            System.out.println(
+                    "Go to " + state.verificationUri
+                    + " and enter code " + state.userCode
+            );
+
+            loginInstructionsShown = true;
+        }
+
+        if (state.status == AuthManager.LoginStatus.SUCCESS) {
+            user = AuthManager.getUser();
+            break;
+        }
+
+        if (state.status == AuthManager.LoginStatus.ERROR) {
+            throw new IllegalStateException(state.message);
+        }
+
+        Thread.sleep(500);
+    }
+}
+
+System.out.println(
+        "Logged in as "
+        + user.getUsername()
+        + " ("
+        + user.getUuid()
+        + ")"
+);
+```
+
+  </TabItem>
+  <TabItem label="Kotlin">
+
+```kotlin
+val authDirectory = Path.of("<auth-directory>")
+
+AuthManager.init(authDirectory)
+
+var user: User? = null
+
+if (AuthManager.hasSessionSaved()) {
+    user = AuthManager.loginWithSavedSession()
+}
+
+if (user == null) {
+    AuthManager.startDeviceCodeLoginAsync()
+
+    var loginInstructionsShown = false
+
+    while (true) {
+        val state = AuthManager.getLoginState()
+
+        if (!loginInstructionsShown
+            && state.userCode != null
+            && state.verificationUri != null
+        ) {
+            println(
+                "Go to ${state.verificationUri} and enter code ${state.userCode}"
+            )
+
+            loginInstructionsShown = true
+        }
+
+        if (state.status == AuthManager.LoginStatus.SUCCESS) {
+            user = AuthManager.getUser()
+            break
+        }
+
+        if (state.status == AuthManager.LoginStatus.ERROR) {
+            throw IllegalStateException(state.message)
+        }
+
+        Thread.sleep(500)
+    }
+}
+
+println(
+    "Logged in as ${user!!.username} (${user.uuid})"
+)
+```
+
+  </TabItem>
+</Tabs>
+
+The returned `User` can now be passed directly to Minified Launch:
+
+<Tabs>
+  <TabItem label="Java">
+
+```java
+Launcher.launchMinecraft(
+        user,
+        config
+);
+```
+
+  </TabItem>
+  <TabItem label="Kotlin">
+
+```kotlin
+Launcher.launchMinecraft(
+    user,
+    config
+)
+```
+
+  </TabItem>
+</Tabs>

@@ -1,0 +1,32 @@
+---
+title: Quick Start
+description: Start from scratch with Minified.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## 1. Create the Project
+
+1. Open **IntelliJ IDEA**.
+2. Select **New Project** -> **Java/Kotlin** (Build System: Gradle).
+
+---
+
+## 2. Configure Gradle
+
+Open your `build.gradle` file and add the repository and dependency:
+
+```groovy
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    // Replace 2.1.0 with your preferred version
+    implementation 'com.github.dervarex.minified:minified-launch:2.1.0'
+}
+```
+Now, reload the Gradle project to download the dependencies.
+
+Once that finishes, you can start coding your launcher.

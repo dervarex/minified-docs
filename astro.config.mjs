@@ -6,19 +6,45 @@ import starlight from '@astrojs/starlight';
 export default defineConfig({
 	integrations: [
 		starlight({
-			title: 'My Docs',
+			title: 'Minified',
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
 			sidebar: [
 				{
 					label: 'Guides',
 					items: [
 						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', slug: 'guides/example' },
+						{ label: 'Getting Started', slug: 'guides/getting-started' },
 					],
 				},
 				{
-					label: 'Reference',
-					items: [{ autogenerate: { directory: 'reference' } }],
+					label: 'Auth',
+					items: [
+							{
+								label: 'Authentication',
+								slug: 'guides/minified-auth/authentication',
+							},
+					],
+				},
+				{
+					label: 'Launching',
+					items: [
+							{
+								label: 'Basics',
+								slug: 'guides/minified-launch/basics',
+							},
+							{
+								label: 'Loaders',
+								slug: 'guides/minified-launch/modding/loader',
+							},
+							{
+								label: 'Configuration',
+								slug: 'guides/minified-launch/configuration',
+							},
+							{
+								label: 'Versions',
+								slug: 'guides/minified-launch/versions/versions',
+							},
+					],
 				},
 			],
 		}),
