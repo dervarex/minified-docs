@@ -8,6 +8,9 @@ import starlight from '@astrojs/starlight';
 export default defineConfig({
 	integrations: [
 		starlight({
+			      components: {
+        			Footer: "./src/components/Footer.astro",
+      			},
 			customCss: ['./src/styles/configuration.css'],
 			title: 'Minified',
 
